@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: to-do-app
+  namespace: depi-project 
+  labels:
+    app: to-do-app 
+spec:
+  selector:
+    app: to-do-app
+  type: LoadBalancer  
+  ports:
+    - port: 3000
+      targetPort: 3000 

@@ -1,0 +1,32 @@
+---
+- name: "Build with Ansible"
+  hosts: app_servers
+  become: true
+  vars:
+    docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
+    docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
+    image_tag: "sharara99/to-do-app:{{ build_number }}"  # Use the build_number variable
+
+  tasks:
+    - name: Clone repo
+      command: git clone https://github.com/abohmeed/getting-started-app.git
+      args:
+        chdir: /home/ubuntu
+      ignore_errors: yes
+
+    - name: Log in to Docker
+      docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+
+    - name: Build image
+      command: docker build -t {{ image_tag }} .
+      args:
+        chdir: /home/ubuntu/getting-started-app
+      ignore_errors: yes  
+
+    - name: Push image
+      command: docker push {{ image_tag }}
+      args:
+        chdir: /home/ubuntu/getting-started-app
+      ignore_errors: yes
