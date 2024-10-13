@@ -1,11 +1,11 @@
 ---
-- name: "Build with Ansible"
+- name: "Build Docker images with Ansible"
   hosts: app_servers
   become: true
   vars:
     docker_username: "{{ lookup('env', 'DOCKER_USERNAME') }}"
     docker_password: "{{ lookup('env', 'DOCKER_PASSWORD') }}"
-    image_tag: "sharara99/to-do-app:{{ build_number }}"  # Use the build_number variable
+    build_number: "{{ build_number }}"  # Use the build_number variable
 
   tasks:
     - name: Clone repo
@@ -19,14 +19,10 @@
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
 
-    - name: Build image
-      command: docker build -t {{ image_tag }} .
-      args:
-        chdir: /home/ubuntu/getting-started-app
-      ignore_errors: yes  
-
-    - name: Push image
-      command: docker push {{ image_tag }}
+    - name: Build and push Docker images
+      shell: |
+        docker build -t sharara99/to-do-app:{{ build_number }} . 
+        docker push sharara99/to-do-app:{{ build_number }}
       args:
         chdir: /home/ubuntu/getting-started-app
       ignore_errors: yes
