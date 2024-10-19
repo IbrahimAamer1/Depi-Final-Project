@@ -1,9 +1,12 @@
 pipeline {
     agent { label 'worker' }
+
     stages {
         stage('Setup') {
             steps {
-                git branch: 'main', credentialsId: 'Github', url: 'https://github.com/sharara99/DEPI-Final-Project.git'
+                script {
+                    git branch: 'main', credentialsId: 'Github', url: 'https://github.com/IbrahimAamer1/DEPI-Final-Project.git'
+                }
             }
         }
 
@@ -12,64 +15,72 @@ pipeline {
                 script {
                     sh '''
                         cd terraform
-                        ls -la  # Check contents of the terraform directory
                         terraform init
-                        terraform apply -auto-approve 
+                        terraform plan -out=tfplan
+
+                        # Check if there are changes to be applied
+                        if terraform show -json tfplan | jq .resource_changes | grep -q '"change"'; then
+                            echo "Changes detected, applying infrastructure changes..."
+                            terraform apply -auto-approve tfplan
+                        else
+                            echo "No changes to infrastructure, skipping apply."
+                        fi
                     '''
-                    echo 'Waiting for 2 minutes...'
-                    sh 'sleep 120'  // Sleep for 120 seconds (2 minutes)
                 }
             }
         }
-
-        stage('Ansible for Configuration and Management') {
-            steps {
-                script {
-                    sh '''
-                        ls -la  # Check contents of the ansible main directory
-                        ansible --version
-                        ansible-playbook -i inventory.ini ansible-playbook.yml
-                    '''
-                }
-            }
-        }        
 
         stage('Build and Push Docker Image') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'DockerHub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        // Pass Docker credentials as environment variables to the Ansible playbook
                         sh '''
-                            export DOCKER_USERNAME=${DOCKER_USERNAME}
-                            export DOCKER_PASSWORD=${DOCKER_PASSWORD}
-                            ansible-playbook -i /home/vm1/jenkins-slave/workspace/Final-Project/inventory.ini ansible-playbook.yml -e build_number=${BUILD_NUMBER}
+                            docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                            ansible-playbook -i inventory.ini ansible-playbook.yml 
                         '''
                     }
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy ArgoCD with Helm') {
             steps {
                 script {
-                    echo "Deploying to Kubernetes..."
-                    
-                    // Apply the Kubernetes namespace, service, and deployment YAML files
+                    echo "Deploying ArgoCD using Helm..."
                     sh '''
-                    kubectl apply -f k8s/namespace.yml
-                    kubectl apply -f k8s/service.yml
-                    kubectl apply -f k8s/deployment.yml
-                    '''
-
-                    // Wait for the deployment to be ready
-                    sh "kubectl rollout status deployment/to-do-app -n depi-project"
-                    
-                    // Update the Kubernetes deployment with the new Docker image (rolling update)
-                    sh '''
-                    kubectl set image deployment/to-do-app to-do-app=sharara99/to-do-app:${BUILD_NUMBER} --record -n depi-project
+                        ls -la
+                        if [ -d "k8s/helm/ArgoCD" ]; then
+                            cd k8s/helm/ArgoCD
+                            ./deploy-argocd-minikube.sh
+                        else
+                            echo "Directory k8s/helm/ArgoCD does not exist!"
+                            exit 1
+                        fi
                     '''
                 }
             }
+        }
+
+        stage('Create ArgoCD Application') {
+            steps {
+                script {
+                    echo "Creating ArgoCD Application..."
+                    sh '''
+                        # Apply the ArgoCD application configuration
+                        cd k8s/helm/ArgoCD
+                        kubectl apply -f argocd-app.yaml
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check the logs for errors.'
         }
     }
 }
