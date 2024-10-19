@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
       - name: to-do-app
-        image: sharara99/to-do-app:latest
+        image: IbrahimAamer1/to-do-app:latest
         ports:
         - containerPort: 3000
