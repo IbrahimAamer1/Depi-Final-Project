@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: to-do-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/IbrahimAamer1/Depi-Final-Project.git
+    targetRevision: HEAD
+    path: k8s/helm/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: to-do-app
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
+      # ArgoCD will automatically sync when changes are detected (e.g., new image)
