@@ -36,7 +36,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'DockerHub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
                         sh '''
                             docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-                            ansible-playbook -i inventory.ini ansible-playbook.yml 
+                            ansible-playbook -i inventory.ini playbook.yml 
                         '''
                     }
                 }
