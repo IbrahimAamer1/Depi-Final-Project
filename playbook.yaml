@@ -1,4 +1,3 @@
----
 - name: "Build Docker images with Ansible"
   hosts: app_servers
   become: true
@@ -8,10 +7,16 @@
     build_number: "{{ build_number }}"  # Use the build_number variable
 
   tasks:
-    - name: Clone repo
-      command: git clone https://github.com/abohmeed/getting-started-app.git
+    - name: Check if repo directory exists
+      stat:
+        path: /home/ubuntu/to-do-app
+      register: repo_stat
+
+    - name: Clone repo if not exists
+      command: git clone https://github.com/IbrahimAamer1/to-do-app.git
       args:
         chdir: /home/ubuntu
+      when: not repo_stat.stat.exists
       ignore_errors: yes
 
     - name: Log in to Docker
@@ -19,10 +24,8 @@
         username: "{{ docker_username }}"
         password: "{{ docker_password }}"
 
-    - name: Build and push Docker images
-      shell: |
-        docker build -t sharara99/to-do-app:{{ build_number }} . 
-        docker push sharara99/to-do-app:{{ build_number }}
+    - name: Build Docker image
+      command: docker build -t ibrahimaamer/to-do-app:{{"build_number"}} /home/ubuntu/to-do-app
       args:
-        chdir: /home/ubuntu/getting-started-app
+        chdir: /home/ubuntu/to-do-app
       ignore_errors: yes
