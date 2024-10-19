@@ -17,8 +17,8 @@ resource "null_resource" "generate_inventory" {
   provisioner "local-exec" {
     command = <<EOF
       mkdir -p /home/vm/worker-agent/Depi-Final-Project
-      echo "[app_servers]" > /home/vm/worker-agent/Depi-Final-Project/inventory.ini
-      echo "ec2-instance ansible_host=${aws_instance.ubuntu-instance.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/vm/worker-agent/Depi-Final-Project/terraform/mykey.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /home/vm/worker-agent/Depi-Final-Project/inventory.ini
+      echo "[app_servers]" > /home/vm/worker-agent/workspace/to-do-app/inventory.ini
+      echo "ec2-instance ansible_host=${aws_instance.ubuntu-instance.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/vm/worker-agent/workspace/to-do-app/mykey.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> /home/vm/worker-agent/Depi-Final-Project/inventory.ini
 EOF
   }
 } 
