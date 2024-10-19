@@ -11,8 +11,8 @@ resource "aws_key_pair" "UbuntuKP" {
 
   provisioner "local-exec" {
     command = <<EOF
-    echo '${tls_private_key.pk.private_key_pem}' > /home/vm/worker-agent/Depi-Final-Project/terraform/mykey.pem
-    chmod 400 /home/vm/worker-agent/Depi-Final-Project/terraform/mykey.pem
+    echo '${tls_private_key.pk.private_key_pem}' > /home/vm/worker-agent/workspace/to-do-app/mykey.pem
+    chmod 400 /home/vm/worker-agent/workspace/to-do-app/mykey.pem
     EOF
   }
 }
