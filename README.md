@@ -1,6 +1,9 @@
 # To-Do App Deployment
 
-![Uploading automated.gif…]()
+![automated](https://github.com/user-attachments/assets/3a8d70ac-6fd1-4d46-b82c-08530d89a047)
+
+
+
 
 
 
