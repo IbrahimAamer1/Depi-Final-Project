@@ -1,6 +1,7 @@
 # To-Do App Deployment
 
-![Automated Photo](automated.gif)
+![Uploading automated.gif…]()
+
 
 
 This repository contains the infrastructure and deployment setup for the **To-Do App**, a simple task management application. The project is built with a comprehensive DevOps pipeline using Terraform, Ansible, Jenkins, Kubernetes, and ArgoCD for infrastructure and continuous delivery.
